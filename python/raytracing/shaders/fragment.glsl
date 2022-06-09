@@ -49,6 +49,9 @@ uniform vec2 numTiles;
 uniform bool noGradient;
 uniform bool showElevation = false;
 
+
+float spaceShipRadius = 1.1;
+
 // Convention: ##NAME## names a compile time constant.
 // The string ##NAME## is replaced by the code in __init__.py
 // by looking up its value in the dictionary constants_dict.
@@ -245,6 +248,7 @@ const int object_type_margulis_tube       = 8;
 const int object_type_elevation_enter     = 9;
 const int object_type_elevation_exit      = 10;
 const int object_type_geodesic_tube       = 11;
+const int object_type_spaceship           = 12;
 
 // A ray consists of a point in the hyperbolid model and a
 // unit tangent vector dir orthogonal to the point with respect
@@ -294,8 +298,13 @@ bool isColored(RayHit ray_hit)
         ray_hit.object_type == object_type_edge_fan ||
         ray_hit.object_type == object_type_elevation_enter ||
         ray_hit.object_type == object_type_elevation_exit ||
-        ray_hit.object_type == object_type_geodesic_tube;
+        ray_hit.object_type == object_type_geodesic_tube ||
+        ray_hit.object_type == object_type_spaceship;
 }
+
+// The ray_eye_space needs to be global to find the center of the spaceship
+Ray ray_eye_space;
+
 
 // Advances ray by distance atanh(p).
 //
@@ -535,6 +544,10 @@ normalForRayHit(RayHit ray_hit)
     if(ray_hit.object_type == object_type_insphere) {
         return normalForSphere(ray_hit.ray.point, vec4(1,0,0,0));
     }
+    
+    if(ray_hit.object_type == object_type_spaceship) {
+        return normalForSphere(ray_hit.ray.point, ray_eye_space.point * currentBoost);
+    }
 
     if(ray_hit.object_type == object_type_horosphere) {
         int index = 4 * ray_hit.tet_num + ray_hit.object_index;
@@ -719,6 +732,13 @@ ray_trace_through_hyperboloid_tet(inout RayHit ray_hit)
             }
         }
     }
+    
+    float spaceShipDist = distParamsForSphereIntersection(ray_hit.ray, ray_eye_space.point * currentBoost, spaceShipRadius).x;
+    if (spaceShipDist < smallest_p)
+    {
+        ray_hit.object_type = object_type_spaceship;
+        ray_hit.object_index = 0;
+    }
 
     for (int vertex = 0; vertex < 4; vertex++) {
         int index = 4 * ray_hit.tet_num + vertex;
@@ -795,7 +815,9 @@ ray_trace_through_hyperboloid_tet(inout RayHit ray_hit)
             }
         }
     }
-
+    
+    
+    
     ray_hit.dist += atanh(smallest_p);
     advanceRayByDistParam(ray_hit.ray, smallest_p);
 
@@ -962,6 +984,14 @@ material_params(RayHit ray_hit)
 
     if (ray_hit.object_type == object_type_insphere) {
         result.diffuse = hsv2rgb(vec3(float(ray_hit.tet_num)/float(num_tets), 0.5, 1.0));
+
+        result.diffuse *= 0.5;
+
+        result.ambient = 0.5 * result.diffuse;
+    }
+    
+    if (ray_hit.object_type == object_type_spaceship) {
+        result.diffuse = vec3(0.0,0.0,1.0);
 
         result.diffuse *= 0.5;
 
@@ -1303,7 +1333,7 @@ leaveVertexNeighborhood(inout RayHit rayHit)
 #endif
 
 RayHit computeRayHit(vec2 xy){
-    Ray ray_eye_space = get_ray_eye_space(xy);
+    ray_eye_space = get_ray_eye_space(xy);
 
     RayHit ray_tet_space;
     ray_tet_space.ray.point = ray_eye_space.point * currentBoost;
