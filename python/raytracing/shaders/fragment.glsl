@@ -50,7 +50,7 @@ uniform bool noGradient;
 uniform bool showElevation = false;
 
 
-float spaceShipRadius = 1.1;
+float spaceShipRadius = 1.05;
 
 // Convention: ##NAME## names a compile time constant.
 // The string ##NAME## is replaced by the code in __init__.py
@@ -302,10 +302,6 @@ bool isColored(RayHit ray_hit)
         ray_hit.object_type == object_type_spaceship;
 }
 
-// The ray_eye_space needs to be global to find the center of the spaceship
-Ray ray_eye_space;
-
-
 // Advances ray by distance atanh(p).
 //
 // It is often more convenient to work with tanh(distance) rather than
@@ -546,7 +542,7 @@ normalForRayHit(RayHit ray_hit)
     }
     
     if(ray_hit.object_type == object_type_spaceship) {
-        return normalForSphere(ray_hit.ray.point, ray_eye_space.point * currentBoost);
+        return normalForSphere(ray_hit.ray.point, vec4(1,0,0,0) * currentBoost);
     }
 
     if(ray_hit.object_type == object_type_horosphere) {
@@ -733,8 +729,8 @@ ray_trace_through_hyperboloid_tet(inout RayHit ray_hit)
         }
     }
     
-    float spaceShipDist = distParamsForSphereIntersection(ray_hit.ray, ray_eye_space.point * currentBoost, spaceShipRadius).x;
-    if (spaceShipDist < smallest_p)
+    float spaceShipDist = distParamsForSphereIntersection(ray_hit.ray, vec4(1,0,0,0) * currentBoost, spaceShipRadius).x;
+    if (spaceShipDist < smallest_p && ray_hit.tet_num == currentTetIndex)
     {
         ray_hit.object_type = object_type_spaceship;
         ray_hit.object_index = 0;
@@ -1333,7 +1329,7 @@ leaveVertexNeighborhood(inout RayHit rayHit)
 #endif
 
 RayHit computeRayHit(vec2 xy){
-    ray_eye_space = get_ray_eye_space(xy);
+    Ray ray_eye_space = get_ray_eye_space(xy);
 
     RayHit ray_tet_space;
     ray_tet_space.ray.point = ray_eye_space.point * currentBoost;
