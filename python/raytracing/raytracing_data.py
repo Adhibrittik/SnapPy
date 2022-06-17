@@ -3,6 +3,7 @@ from snappy.snap.mcomplex_base import *
 from snappy.SnapPy import matrix
 
 from .hyperboloid_utilities import *
+from .space_ship_data import SpaceShipData, space_ship_data
 
 __all__ = ['RaytracingData']
 
@@ -69,6 +70,13 @@ class RaytracingData(McomplexEngine):
               for tet in self.mcomplex.Tetrahedra
               for F in t3m.TwoSubsimplices ])
 
+        d['space_ship_supporting_planes'] = (
+            'vec4[]',
+            space_ship_data.supporting_planes)
+        d['space_ship_bounding_planes'] = (
+            'vec4[]',
+            space_ship_data.bounding_planes)
+        
         return d
 
     def get_compile_time_constants(self):
@@ -76,6 +84,7 @@ class RaytracingData(McomplexEngine):
         d[b'##num_tets##'] = len(self.mcomplex.Tetrahedra)
         d[b'##num_cusps##'] = len(self.mcomplex.Vertices)
         d[b'##num_edges##'] = len(self.mcomplex.Edges)
+        d[b'##num_space_ship_triangles##'] = SpaceShipData.num_triangles
         return d
 
 
@@ -112,3 +121,4 @@ class RaytracingData(McomplexEngine):
             weight += tet.Weights[F]
 
         return boost, tet_num, weight
+

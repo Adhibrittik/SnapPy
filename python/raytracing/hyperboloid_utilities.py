@@ -215,3 +215,37 @@ def height_euclidean_triangle(z0, z1, z2):
     """
 
     return abs(_dist_from_projection(z0 - z1, z2 - z1))
+
+def compute_one_bounding_plane_for_ideal_triangle(v, v0, v1):
+    """
+    Given three light-like vectors, compute an equation for a plane.
+    The plane perpendicularly intersects the plane supporting the
+    triangle spanned by v, v0, v1. The intersection is the line
+    spanned by v0 and v1. The plane's normal is facing outward.
+    """
+
+    # Compute the "mid" point on the edge v0 and v1.
+    m = time_r13_normalise(
+        v0 / -r13_dot(v0, v) + v1 / -r13_dot(v1, v))
+
+    return make_r13_unit_tangent_vector(m - v, m)
+
+def compute_one_bounding_plane_for_finite_triangle(v, v0, v1):
+    """
+    Similar to above but given vectors are unit time-like.
+    """
+
+    v0_ideal, v1_ideal = find_endpoints_of_line(v0, v1)
+    
+    return compute_one_bounding_plane_for_ideal_triangle(
+        v, v0_ideal, v1_ideal)
+
+def find_endpoints_of_line(v0, v1):
+
+    # Solve for x = t * v0 + (1-t) * v1, <x|x> = 0.
+
+    #
+
+    # normalize should be in upper_halfspace/__init__.py ???
+    
+    return (light_normalize(v0_ideal), light_normalize(v1_ideal))

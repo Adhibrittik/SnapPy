@@ -49,6 +49,10 @@ uniform vec2 numTiles;
 uniform bool noGradient;
 uniform bool showElevation = false;
 
+#define ##num_space_ship_triangles##
+
+uniform vec4 space_ship_supporting_planes[##num_space_ship_triangles##];
+uniform vec4 space_ship_bounding_planes[3 * ##num_space_ship_triangles##];
 
 float spaceShipRadius = 1.05;
 
