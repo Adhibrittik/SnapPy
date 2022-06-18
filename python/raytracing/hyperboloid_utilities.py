@@ -2,7 +2,9 @@ from snappy.SnapPy import matrix, vector
 
 from snappy.hyperboloid import (r13_dot,
                                 unit_time_vector_to_o13_hyperbolic_translation,
-                                unnormalised_plane_eqn_from_r13_points)
+                                unnormalised_plane_eqn_from_r13_points,
+                                time_r13_normalise)
+from snappy.drilling.geodesic_tube import make_r13_unit_tangent_vector
 
 """
 Helpers for the 1,3-hyperboloid model and conversion to upper half
@@ -246,6 +248,4 @@ def find_endpoints_of_line(v0, v1):
 
     #
 
-    # normalize should be in upper_halfspace/__init__.py ???
-    
-    return (light_normalize(v0_ideal), light_normalize(v1_ideal))
+    return (time_r13_normalize(v0_ideal), time_r13_normalize(v1_ideal))
