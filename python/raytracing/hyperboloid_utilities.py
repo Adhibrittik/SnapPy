@@ -243,8 +243,11 @@ def compute_one_bounding_plane_for_finite_triangle(v, v0, v1):
         v, v0_ideal, v1_ideal)
 
 def find_endpoints_of_line(v0, v1):
-    a=r13_dot(v0,v0)-2*r13_dot(v_0,v_0)+r13_dot(v1,v1)
-    b=2-2*r13_dot(v1,v1)
+    """
+    Returns x values such that x= t * v0 + (1-t) * v1 and <x|x> = 0.
+    """
+    a=r13_dot(v0,v0)-2*r13_dot(v_0,v_1)+r13_dot(v1,v1)
+    b=2*(r13_dot(v0,v1)-r13_dot(v1,v1))
     c=r13_dot(v1,v1)
     d=(b*b-4*a*c)
     t1=(-b+d.sqrt())/(2*a)
@@ -253,8 +256,5 @@ def find_endpoints_of_line(v0, v1):
     x2=t2*v0+(1-t2)*v1
     return (x1,x2)
 
-    # Solve for x = t * v0 + (1-t) * v1, <x|x> = 0.
 
-    #
 
-    #return (time_r13_normalize(v0_ideal), time_r13_normalize(v1_ideal))
